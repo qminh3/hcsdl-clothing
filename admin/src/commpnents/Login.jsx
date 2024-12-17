@@ -22,16 +22,15 @@ const Login = ({setToken}) => {
     // }
     try {
       event.preventDefault();
-      const response = await axios.post(backendUrl + "/api/user/admin", {
+      const response = await axios.post(backendUrl + "/users/login", {
         email,
         password,
       });
-      if (response.data.success) {
-        setToken(response.data.token);
+      if (response.status === 200 && response.data === "Login successful!") {
+        setToken("test");
       }else{
-        alert(response.data.message);
-        toast.error(response.data.message);
-
+        alert("Login failed!");
+        toast.error("Login failed!");
       }
     } catch (error) {
       console.error(error);

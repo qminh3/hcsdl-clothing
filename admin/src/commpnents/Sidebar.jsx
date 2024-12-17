@@ -24,14 +24,14 @@ const Sidebar = () => {
             />
           </svg>
 
-          <p className="hidden md:block">Add Items</p>
+          <p className="hidden md:block">Add Products</p>
         </NavLink>
         <NavLink className='flex items-center border gap-3 border-gray-300 border-r-0 px-3 py-2 rounded-lg' to="/list ">
           
 
         <svg className="h-8 w-8 text-red-500"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth="2"  strokeLinecap="round"  strokeLinejoin="round">  <polyline points="9 11 12 14 22 4" />  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
 
-          <p className="hidden md:block">List Items</p>
+          <p className="hidden md:block">View Products</p>
         </NavLink>
         <NavLink className='flex items-center border gap-3 border-gray-300 border-r-0 px-3 py-2 rounded-lg' to="/orders ">
           
