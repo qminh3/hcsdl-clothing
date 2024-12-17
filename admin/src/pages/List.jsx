@@ -66,8 +66,9 @@ const List = ({token}) => {
       <b className="mb-2 text-gray-900 text-2xl">Tất cả sản phẩm</b>
       <div className="flex flex-col gap-2 ">
         
-        <div className="hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] items-center  py-1 px-2 border bg-gray-100 text-sm">
+        <div className="hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] items-center  py-1 px-2 border bg-gray-100 text-sm">
           <b>Image</b>
+          <b>ID</b>
           <b>Name</b>
           <b>Color</b>
           <b>Size</b>
@@ -84,14 +85,15 @@ const List = ({token}) => {
             console.log(productColors);
             console.log(productSizes);
             return (  
-              <div key={index} className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 items-center  py-1 px-2 border bg-white text-sm">
+              <div key={index} className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 items-center  py-1 px-2 border bg-white text-sm">
                 <img src={Img1} alt={item.name} className="w-12 h-10" />
+                <p>{item.productId}</p>
                 <p>{item.name}</p>
                 <p>{productColors.map(color => color.color).join(', ')}</p>
                 <p>{productSizes.map(size => size.size).join(', ')}</p>
                 <p>{currency} {item.price}</p>
                 <p>{item.description}</p>
-                <p onClick={()=>handleDelete(item.productId) } className='md:text-center text-right cursor-pointer '>Delete</p>
+                <p onClick={()=>handleDelete(item.productId) }   className='md:text-center text-right cursor-pointer text-red-500 hover:bg-red-600 hover:text-white p-1 rounded'>Delete</p>
 
                 {/* <div className="md:text-center text-right cursor-auto text-lg">
                   <button onClick={() => handleDelete(item._id)}>Delete</button>
