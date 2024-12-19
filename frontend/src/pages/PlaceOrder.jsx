@@ -6,8 +6,12 @@ import { assets } from "../assets/assets";
 import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import selectedPromotions from "../pages/Cart.jsx";
+import { useNavigate } from "react-router-dom";
 
 const PlaceOrder = () => {
+  const { cart, finalTotal, userInfo } = useContext(ShopContext);
+  const navigate = useNavigate();
   const [method, setMethod] = useState("cod"); // Default payment method is COD
   
 
@@ -35,13 +39,39 @@ const PlaceOrder = () => {
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
-
     
+    try {
+      const orderData = {
+        orderName: `${formData.firstName} ${formData.lastName}`,
+        status: "pending",
+        customerId: "USER001",
+        employeeId: "USER004", 
+        productId: cart[0]?.productId, 
+        price: parseFloat(finalTotal),
+        quantity: cart.reduce((total, item) => total + item.quantity, 0),
+        orderDate: new Date().toISOString().split('T')[0] 
+      };
+
+      const response = await axios.post(
+        "http://localhost:8080/clothing-store/orders",
+        orderData
+      );
+
+      if (response.status === 201) {
+        toast.success("Order placed successfully!");
+        navigate("/orders");
+      } else {
+        toast.error("Failed to place order");
+      }
+    } catch (error) {
+      console.error("Tạo order không thành công", error);
+      toast.error(error.response?.data || "Tạo order không thành công");
+    }
   };
 
   return (
     <form
-     
+      onSubmit={onSubmitHandler}
       className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t"
     >
       {/* Left side - Billing and Address */}
@@ -349,7 +379,7 @@ const PlaceOrder = () => {
               <p className="text-black text-sm font-medium mx-2">Visa</p>
             </div>
           </div>
-
+                
           {/* Visa Payment Fields */}
           {method === "visa" && (
             <div className="mt-4">

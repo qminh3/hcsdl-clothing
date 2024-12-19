@@ -16,9 +16,8 @@ const Cart = () => {
     setSearch,
     setShowSearch,
     cartItems,
-    
-  
-    cart, removeFromCart, clearCart
+    cart, removeFromCart, clearCart,
+    setFinalTotal
   } = useContext(ShopContext);
 
 const formatDate = (dateStr) => {
@@ -27,7 +26,9 @@ const formatDate = (dateStr) => {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
-};
+  };
+  
+  const [selectedPromotions, setSelectedPromotions] = useState([]);
   const [promotions, setPromotions] = useState([]);
   const [showPromotions, setShowPromotions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,10 +47,36 @@ const formatDate = (dateStr) => {
     }
   };
   
+  const handlePromotionSelect = (promo) => {
+    if (selectedPromotions.some(p => p.promotionId === promo.promotionId)) {
+      setSelectedPromotions(selectedPromotions.filter(p => p.promotionId !== promo.promotionId));
+    } else {
+      setSelectedPromotions([...selectedPromotions, promo]);
+    }
+  };
+
+  const calculateTotal = () => {
+    const originalTotal = cart.reduce((total, item) => total + item.quantity * item.price, 0);
+    
+
+    const totalDiscount = selectedPromotions.reduce((acc, promo) => {
+      return acc + (promo.discount / 100);
+    }, 0);
   
+   
+    const effectiveDiscount = Math.min(totalDiscount, 1);
+    
+    return (originalTotal * (1 - effectiveDiscount)).toFixed(2);
+  };
+
   useEffect(() => {
     fetchPromotions();
   }, []);
+
+  useEffect(() => {
+    const total = calculateTotal();
+    setFinalTotal(total);
+  }, [cart, selectedPromotions]);
 
   if (cart.length === 0) {
     return <div>Your cart is empty</div>;
@@ -119,13 +146,25 @@ const formatDate = (dateStr) => {
                 ) : promotions.length > 0 ? (
                   <div className="space-y-3">
                     {promotions.map((promo) => (
-                      <div key={promo.promotion_id} className="border-b pb-3">
+                      <div key={promo.promotionId} className="border-b pb-3">
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <p><span className="font-medium">ID:</span> {promo.promotionId}</p>
                           <p><span className="font-medium">Tên:</span> {promo.name}</p>
                           <p><span className="font-medium">Giảm giá:</span> {promo.discount}%</p>
                           <p><span className="font-medium">Bắt đầu:</span> {formatDate(promo.startDate)}</p>
                           <p><span className="font-medium">Kết thúc:</span> {formatDate(promo.endDate)}</p>
+                          <button 
+                            onClick={() => handlePromotionSelect(promo)}
+                            className={`flex items-center gap-2 text-white px-3 py-1 rounded-lg ${
+                              selectedPromotions.some(p => p.promotionId === promo.promotionId)
+                                ? 'bg-green-500 hover:bg-green-600'
+                                : 'bg-blue-500 hover:bg-blue-600'
+                            }`}
+                          >
+                            {selectedPromotions.some(p => p.promotionId === promo.promotionId)
+                              ? 'Đã chọn'
+                              : 'Áp dụng'}
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -143,8 +182,27 @@ const formatDate = (dateStr) => {
             </div>
             <div className="flex justify-between">
               <p>Tổng tiền</p>
-              <p>{currency}{" "}{cart.reduce((total, item) => total + item.quantity * item.price, 0)}</p>
+              <p>{currency} {calculateTotal()}</p>
             </div>
+            {selectedPromotions.length > 0 && (
+              <div className="mt-2">
+                <p className="text-sm font-medium">Khuyến mãi đã áp dụng:</p>
+                {selectedPromotions.map(promo => (
+                  <div key={promo.promotionId} className="flex justify-between text-sm text-green-600">
+                    <p>{promo.name} (-{promo.discount}%)</p>
+                    <button 
+                      onClick={() => handlePromotionSelect(promo)}
+                      className="text-red-500 hover:text-red-600"
+                    >
+                      Hủy
+                    </button>
+                  </div>
+                ))}
+                <div className="text-sm text-gray-500 mt-1">
+                  Tổng giảm giá: {selectedPromotions.reduce((acc, promo) => acc + promo.discount, 0)}%
+                </div>
+              </div>
+            )}
             <div className="w-full text-end">
               <button
                   onClick={() => navigate("/place-order")}
