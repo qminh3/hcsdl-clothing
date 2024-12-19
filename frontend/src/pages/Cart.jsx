@@ -3,10 +3,8 @@ import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import { assets } from "../assets/assets";
 import CartTotal from "../components/CartTotal";
+import { backendUrl} from "../App";
 import axios from "axios";
-
-// Add API base URL configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 const Cart = () => {
   const {
@@ -18,82 +16,46 @@ const Cart = () => {
     setSearch,
     setShowSearch,
     cartItems,
-    cart, 
-    removeFromCart, 
-    clearCart
+    
+  
+    cart, removeFromCart, clearCart
   } = useContext(ShopContext);
 
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
   const [promotions, setPromotions] = useState([]);
   const [showPromotions, setShowPromotions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchPromotions = async (retryCount = 0) => {
+  const fetchPromotions = async () => {
     setIsLoading(true);
     setError(null);
-    
     try {
-      console.log('Fetching promotions...'); // Debug log
-      
-      const response = await axios.get(`${API_BASE_URL}/promotions`, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        timeout: 5000 // 5 second timeout
-      });
-
-      console.log('Response:', response); // Debug log
-
-      if (response.status === 200 && response.data) {
-        setPromotions(response.data);
-      } else {
-        throw new Error('Invalid response format');
-      }
-      
+      const response = await axios.get("http://localhost:8080/clothing-store/promotions");
+      setPromotions(response.data);
     } catch (error) {
-      console.error('Error details:', error);
-      
-      // Implement retry logic (max 3 attempts)
-      if (retryCount < 3) {
-        console.log(`Retrying... Attempt ${retryCount + 1}`);
-        setTimeout(() => fetchPromotions(retryCount + 1), 1000);
-        return;
-      }
-
-      setError(error.response?.data?.message || 'Failed to fetch promotions');
+      setError('Failed to load promotions');
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Load promotions when component mounts
+  
+  
   useEffect(() => {
-    if (showPromotions) {
-      fetchPromotions();
-    }
-  }, [showPromotions]);
+    fetchPromotions();
+  }, []);
 
   if (cart.length === 0) {
     return <div>Your cart is empty</div>;
   }
 
   return (
-    // <div>
-    //   <h2>Your Cart</h2>
-    //   <ul>
-    //     {cart.map(item => (
-    //       <li key={item.productId}>
-    //         {item.name} - {item.quantity} x ${item.price}
-    //         <button onClick={() => removeFromCart(item.productId)}>Remove</button>
-    //       </li>
-    //     ))}
-    //   </ul>
-    //   <button onClick={clearCart}>Clear Cart</button>
-    //   <div>
-    //     Total: ${cart.reduce((total, item) => total + item.quantity * item.price, 0)}
-    //   </div>
-    // </div>
       <div className="border-t pt-14">
         <div className="text-2xl mb-3">
           <Title
@@ -141,30 +103,29 @@ const Cart = () => {
         <button onClick={clearCart}>Clear Cart</button>
           <div className="mt-4">
             <button
-              onClick={() => {
-                setShowPromotions(!showPromotions);
-                if (!promotions.length) {
-                  fetchPromotions();
-                }
-              }}
+              onClick={() => setShowPromotions(!showPromotions)}
               className="bg-black text-white px-4 py-2 rounded-lg"
             >
-              Xem khuyến mãi
+              {showPromotions ? 'Ẩn khuyến mãi' : 'Xem khuyến mãi'}
             </button>
 
             {showPromotions && (
               <div className="mt-4 bg-white rounded-lg shadow p-4">
                 <h3 className="text-lg font-semibold mb-4">Danh sách khuyến mãi</h3>
-                {promotions.length > 0 ? (
+                {isLoading ? (
+                  <p className="text-center py-4">Đang tải khuyến mãi...</p>
+                ) : error ? (
+                  <p className="text-red-500 text-center py-4">{error}</p>
+                ) : promotions.length > 0 ? (
                   <div className="space-y-3">
                     {promotions.map((promo) => (
                       <div key={promo.promotion_id} className="border-b pb-3">
                         <div className="grid grid-cols-2 gap-2 text-sm">
-                          <p><span className="font-medium">ID:</span> {promo.promotion_id}</p>
+                          <p><span className="font-medium">ID:</span> {promo.promotionId}</p>
                           <p><span className="font-medium">Tên:</span> {promo.name}</p>
                           <p><span className="font-medium">Giảm giá:</span> {promo.discount}%</p>
-                          <p><span className="font-medium">Bắt đầu:</span> {new Date(promo.start_date).toLocaleDateString('vi-VN')}</p>
-                          <p><span className="font-medium">Kết thúc:</span> {new Date(promo.end_date).toLocaleDateString('vi-VN')}</p>
+                          <p><span className="font-medium">Bắt đầu:</span> {formatDate(promo.startDate)}</p>
+                          <p><span className="font-medium">Kết thúc:</span> {formatDate(promo.endDate)}</p>
                         </div>
                       </div>
                     ))}
