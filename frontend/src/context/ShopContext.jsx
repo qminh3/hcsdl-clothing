@@ -3,7 +3,6 @@ import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
 export const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
@@ -11,7 +10,7 @@ const ShopContextProvider = (props) => {
   const delivery_fee = 10;
   const backendUrl = "http://localhost:8080/clothing-store";
 
-  // Current states
+ 
   const [token, setToken] = useState("");
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
@@ -22,10 +21,13 @@ const ShopContextProvider = (props) => {
   const [colors, setColors] = useState([]);
   const [sizes, setSizes] = useState([]);
 
-  // New state for user info
+
   const [userInfo, setUserInfo] = useState(null);
 
-  // Continue with existing functions...
+
+  const [finalTotal, setFinalTotal] = useState(0);
+
+
 
   const [cart, setCart] = useState([]);
 
@@ -164,6 +166,8 @@ const ShopContextProvider = (props) => {
     addToCart,
     removeFromCart,
     clearCart,
+    finalTotal,
+    setFinalTotal,
   };
 
   return (
